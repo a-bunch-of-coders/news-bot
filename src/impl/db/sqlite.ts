@@ -9,7 +9,7 @@ export default async function initializeDatabase(config: Config): Promise<KnexDa
   try {
     return await KnexDatabase.initialize({
       client: "sqlite3",
-      connection: { filename: "./feeds.db" },
+      connection: { filename: config.database.url }, // TODO: parse out sqlite: from url
       useNullAsDefault: true,
       migrations: { directory: "./migrations" },
     });

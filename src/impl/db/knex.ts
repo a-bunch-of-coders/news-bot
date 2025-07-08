@@ -24,6 +24,7 @@ export class KnexDatabase extends Database {
         title?: string | null,
         webhookUrl?: string | null
     ): Promise<void> {
+        
         await this.db<Feed>("feeds").insert({
             guild_id: guildId,
             channel_id: channelId,
