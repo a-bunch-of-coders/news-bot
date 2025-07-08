@@ -71,10 +71,11 @@ export class FeedCommand {
 
     const guildId   = interaction.guild?.id;
     const channelId = target.id;
+    console.log(`Adding feed ${url} to channel ${channelId} in guild ${guildId}`);
     if (!guildId) return;
 
     // 3) Check duplicate
-    if (await interaction.client.db.duplicate(Number(guildId), Number(channelId), url)) {
+    if (await interaction.client.db.duplicate(guildId, channelId, url)) {
       await interaction.reply({
         content: `This feed is already added to <#${channelId}>.`,
         ephemeral: true,
@@ -106,7 +107,7 @@ export class FeedCommand {
     // 6) Parse & entry count check
     let feed;
     try {
-      feed = parseFeed(content);
+      feed = await parseFeed(content);
     } catch (err: any) {
       await interaction.editReply({
         content: `Failed to parse feed: ${err.message}`,
@@ -115,17 +116,17 @@ export class FeedCommand {
     }
 
 
-    if (feed.root.children.length > MAX_ENTRY_COUNT) {
+    if (feed.items.length > MAX_ENTRY_COUNT) {
       await interaction.editReply({
-        content: `Feed has ${feed.root.children[0].children.length} items—max is ${MAX_ENTRY_COUNT}.`,
+        content: `Feed has ${feed.items.length} items—max is ${MAX_ENTRY_COUNT}.`,
       });
       return;
     }
 
     // 7) Insert into DB
     await interaction.client.db.add(
-      Number(guildId),
-      Number(channelId),
+      guildId,
+      channelId,
       url,
       feed.title ?? undefined,
       null
@@ -135,7 +136,7 @@ export class FeedCommand {
     const domain = parsedUrl.host;
     const kb     = (content.length / 1024).toFixed(1);
     await interaction.editReply({
-      content: `✅ Added \`${domain}\` → <#${channelId}> | ${feed.root.children[0].children.length} items • ${kb} KB`,
+      content: `✅ Added \`${domain}\` → <#${channelId}> | ${feed.items.length} items • ${kb} KB`,
     });
   }
 }

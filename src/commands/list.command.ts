@@ -43,7 +43,7 @@ export class ListCommand {
       return;
     }
 
-    const feeds = await interaction.client.db.guild(Number(guildId));
+    const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
       await interaction.reply({
         content: "No RSS feeds configured for this server.",
@@ -68,7 +68,7 @@ export class ListCommand {
     const guildId = interaction.guildId;
     if (!guildId) return;
 
-    const feeds = await interaction.client.db.guild(Number(guildId));
+    const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
       await interaction.reply({ content: "No feeds to page.", ephemeral: true });
       return;
@@ -113,7 +113,7 @@ export class ListCommand {
     const guildId = interaction.guildId;
     if (!guildId) return;
 
-    const feeds = await interaction.client.db.guild(Number(guildId));
+    const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
       await interaction.reply({ content: "No feeds to page.", ephemeral: true });
       return;
@@ -133,7 +133,7 @@ export class ListCommand {
     const guildId = interaction.guildId;
     if (!guildId) return;
 
-    const feeds = await interaction.client.db.guild(Number(guildId));
+    const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
       await interaction.reply({ content: "No feeds to page.", ephemeral: true });
       return;

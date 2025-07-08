@@ -11,7 +11,9 @@ const ASIDE_BLOCK_REGEX = /aside_block\s+<[^>]*>/g;
 const OBJECT_REFERENCE_REGEX = /<[^>]*object at 0x[a-fA-F0-9]+>/g;
 const ENCODED_ENTITIES_REGEX = /&#\d+;/g;
 
-const { createTree } = require('xml-trap');
+// const { createTree } = require('xml-trap');
+import Parser from 'rss-parser';
+
 
 export function clean(input: string): string {
   if (!input) return '';
@@ -165,6 +167,8 @@ export function parseFeed(content: string) {
     if (!text) {
         throw new Error("Content is empty or whitespace only");
     }
-    const tree = createTree(text);
+    // const tree = createTree(text);
+    const parser = new Parser();
+    const tree = parser.parseString(text);
     return tree;
 }

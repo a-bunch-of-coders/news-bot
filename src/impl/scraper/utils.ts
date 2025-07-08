@@ -82,3 +82,4 @@ export function validateImageUrl(url: string): boolean {
       || lower.includes("image") || lower.includes("img");
 }
 
+

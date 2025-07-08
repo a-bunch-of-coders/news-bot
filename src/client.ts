@@ -5,7 +5,7 @@ import type { Database } from "./abstract/db";
 import type { Config } from "./config";
 
 
-export async function buildClient(config: Config, db: Database): Promise<Client> {
+export async function buildClient( db: Database): Promise<Client> {
 	const client = new Client({
 		intents: [
 			IntentsBitField.Flags.Guilds,
@@ -31,7 +31,6 @@ export async function buildClient(config: Config, db: Database): Promise<Client>
 
 	await importx(`${__dirname}/commands/**/*.{js,ts}`);
 
-	await client.login(config.bot.token);
 
 	// so everywhere in the code we can use client.db
 	client.db = db;

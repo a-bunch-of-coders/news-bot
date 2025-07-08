@@ -6,6 +6,7 @@ import { URL } from "url";
 import type { Database, Feed as DbFeed } from "../../abstract/db";
 import { clean,description as parserDescription, parseFeed, title as parserTitle, truncate } from "./parser";
 import { extractImage, fetchSingle, validateImageUrl } from "./utils";
+import { parse } from "path";
 
 // Global lock and posted articles tracking
 let feedCheckLock = false;
@@ -33,10 +34,7 @@ export async function check(database: Database, client: Client): Promise<void> {
     const tasks = feeds.map(feed =>
       limit(async () => {
         try {
-          const count = await Promise.race([
-            processFeed(feed, database, client),
-            new Promise<number>((_, reject) => setTimeout(() => { reject(new Error("Timeout")); }, 45_000))
-          ]);
+          const count = await processFeed(feed, database, client);
           return { url: feed.url, ok: true, count };
         } catch (error: any) {
           if (error.message === "Timeout") {
@@ -75,6 +73,7 @@ export async function single(database: Database, client: Client, url: string): P
 
 async function processFeed(feed: DbFeed, database: Database, client: Client): Promise<number> {
   console.info(`Checking feed: ${feed.url}`);
+  console.info(feed)
 
   // Fetch content with timeout
   let content: string;
@@ -86,7 +85,7 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
   }
 
   const parsed = await parseFeed(content);
-  const total = parsed.root.children[0].children.length;
+  const total = parsed.items.length
   if (total === 0) {
     console.info(`Feed ${feed.url} is empty`);
     return 0;
@@ -99,11 +98,13 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
   const itemsToCheck = feed.last_item_date ? Math.min(3, total) : 1;
 
   // Sort descending by publish/update date
-  const entries = [...parsed.root.children[0].children].sort((a, b) => {
+  const entries = [...parsed.items].sort((a, b) => {
     const da = (a.published || a.updated)?.getTime() ?? 0;
     const db = (b.published || b.updated)?.getTime() ?? 0;
     return db - da;
   });
+ 
+
 
   for (const entry of entries.slice(0, itemsToCheck)) {
     const id = identifier(entry);
@@ -182,7 +183,9 @@ function identifier(entry: any): string {
 }
 
 async function post(feed: DbFeed, entry: any, client: Client): Promise<void> {
+    console.log(`Posting to channel ${feed.channel_id} for feed ${feed.url}`);
   const channel = await client.channels.fetch(feed.channel_id.toString());
+  console.log(channel)
   if (!channel || !(channel instanceof TextChannel)) {
     throw new Error(`Invalid channel: ${feed.channel_id}`);
   }

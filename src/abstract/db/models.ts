@@ -1,8 +1,8 @@
 // src/models.ts
 export interface Feed {
   id: number;
-  guild_id: number;
-  channel_id: number;
+  guild_id: string;
+  channel_id: string;
   url: string;
   title: string | null;
   webhook_url: string | null;
@@ -11,6 +11,6 @@ export interface Feed {
 }
 
 export interface GuildSettings {
-  guild_id: number;
-  rss_channel_id: number;
+  guild_id: string;
+  rss_channel_id: string;
 }
