@@ -1,5 +1,6 @@
 import { z } from "zod";
 import * as fs from "fs/promises";
+import {jsonc} from "jsonc";
 
 
 
@@ -52,8 +53,11 @@ export async function ensureConfig(configPath: string): Promise<Config> {
     return generateConfig(configPath);
   }
 
+
   // Load the config file
-  const configFile = await import(configPath);
+  const configFile = await jsonc.read(
+    configPath
+  )
 
   // Validate the config
   return validateConfig(configFile);
