@@ -1,9 +1,12 @@
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
-import { Config } from "./impl/config";
+import { Config } from "./config";
+
+import { Database } from "./abstract/db";
+import { CustomClient } from "./types";
 
 
-async function buildClient(config: Config): Promise<Client> {
+export async function buildClient(config: Config, db: Database): Promise<Client> {
 	const client = new Client({
 		intents: [
 			IntentsBitField.Flags.Guilds,
@@ -11,7 +14,7 @@ async function buildClient(config: Config): Promise<Client> {
 			IntentsBitField.Flags.GuildMembers,
 		],
 		silent: false,
-	});
+	}) as CustomClient;
 
 	client.on("ready", async () => {
 		console.log(">> Bot started");
@@ -21,6 +24,10 @@ async function buildClient(config: Config): Promise<Client> {
 	});
 
 	await client.login(config.bot.token);
+
+	// so everywhere in the code we can use client.db
+	client.db = db;
+
 	return client;
 }
 

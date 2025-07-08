@@ -5,7 +5,7 @@ import { expect } from 'chai';
 // import { createRequire } from 'module';
 // import * as fsPromises from 'fs/promises';
 
-import { validateConfig } from '../src/impl/config';
+import { validateConfig } from '../src/config';
 
 describe('validateConfig', () => {
 	it('should return parsed config when input is valid', () => {
