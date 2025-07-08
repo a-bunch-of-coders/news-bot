@@ -1,5 +1,5 @@
-import type { Config } from "../../config";
-import { KnexDatabase } from "./knex";
+import type { Config } from "../../config.js";
+import { KnexDatabase } from "./knex.js";
 
 
 export default async function initializeDatabase(config: Config): Promise<KnexDatabase> {

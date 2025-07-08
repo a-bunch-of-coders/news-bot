@@ -4,9 +4,9 @@ import pLimit from "p-limit";
 import { parse } from "path";
 import { URL } from "url";
 
-import type { Database, Feed as DbFeed } from "../../abstract/db";
-import { clean,description as parserDescription, parseFeed, title as parserTitle, truncate } from "./parser";
-import { extractImage, fetchSingle, validateImageUrl } from "./utils";
+import type { Database, Feed as DbFeed } from "../db/abstract.js";
+import { clean,description as parserDescription, parseFeed, title as parserTitle, truncate } from "./parser.js";
+import { extractImage, fetchSingle, validateImageUrl } from "./utils.js";
 
 // Global lock and posted articles tracking
 let feedCheckLock = false;
@@ -183,9 +183,7 @@ function identifier(entry: any): string {
 }
 
 async function post(feed: DbFeed, entry: any, client: Client): Promise<void> {
-    console.log(`Posting to channel ${feed.channel_id} for feed ${feed.url}`);
   const channel = await client.channels.fetch(feed.channel_id.toString());
-  console.log(channel)
   if (!channel || !(channel instanceof TextChannel)) {
     throw new Error(`Invalid channel: ${feed.channel_id}`);
   }

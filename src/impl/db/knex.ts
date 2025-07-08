@@ -2,8 +2,8 @@
 import type { Knex} from "knex";
 import {default as knex} from "knex";
 
-import type { Feed } from "../../abstract/db";
-import { Database } from "./../../abstract/db";
+
+import { Database, type Feed } from "./abstract.js";
 
 export class KnexDatabase extends Database {
     private readonly db: Knex;

@@ -2,8 +2,7 @@ import { importx } from "@discordx/importer";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
 
-import type { Database } from "./abstract/db";
-import type { Config } from "./config";
+import type { Database } from "./impl/db/abstract.js";
 
 
 export async function buildClient( db: Database): Promise<Client> {
@@ -28,9 +27,9 @@ export async function buildClient( db: Database): Promise<Client> {
 		client.executeInteraction(interaction);
 	});
 
-	console.log(`>> Importing commands from ${__dirname}/commands/**/*.{js,ts}`);
+	console.log(`>> Importing commands from ${import.meta.dirname}/commands/**/*.{js}`);
 
-	await importx(`${__dirname}/commands/**/*.{js,ts}`);
+	await importx(`${import.meta.dirname}/commands/**/*.{js}`);
 
 
 	// so everywhere in the code we can use client.db

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "module": "ESNext",                     /* Use native ESM output */
-    "target": "ESNext",                     /* Keep decorators metadata intact */
-    "moduleResolution": "Node",             /* Node-style resolution */
+    "module": "nodenext",                     /* Use native ESM output */
+    "target": "es6",                     /* Keep decorators metadata intact */
+    "moduleResolution": "nodenext",             /* Node-style resolution */
     "experimentalDecorators": true,         /* Enable @decorators */
     "emitDecoratorMetadata": false,         /* discordx doesn’t rely on reflect-metadata at runtime */
     "noImplicitAny": true,                  /* Catch missing types */

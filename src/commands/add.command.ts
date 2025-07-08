@@ -13,9 +13,8 @@ import {
 } from "discordx";
 import { URL } from "url";
 
-import { Database } from "../abstract/db";
-import { parseFeed } from "../impl/scraper/parser";
-import { fetchSingle as fetchFeed } from "../impl/scraper/utils";
+import { parseFeed } from "../impl/scraper/parser.js";
+import { fetchSingle as fetchFeed } from "../impl/scraper/utils.js";
 
 const FETCH_TIMEOUT_MS   = 15_000;
 const MAX_FEED_SIZE      = 5_000_000;  // 5 MB

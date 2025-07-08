@@ -1,4 +1,4 @@
-// src/models.ts
+// this theoretically should be moved to knex/sql/tables definition iirc.
 export interface Feed {
   id: number;
   guild_id: string;

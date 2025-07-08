@@ -106,11 +106,18 @@ export function description(entry: {
   summary?: string;
   content?: { body?: string };
 }): string {
+    console.log(entry)
   let desc: string;
   if (entry.summary) {
     desc = clean(entry.summary);
-  } else if (entry.content?.body) {
-    desc = clean(entry.content.body);
+  } else if (entry.content) {
+    if (typeof entry.content === 'string') {
+      desc = clean(entry.content);
+    } else if (entry.content.body) {
+      desc = clean(entry.content.body);
+    } else {
+      return 'No description available.';
+    }
   } else {
     return 'No description available.';
   }

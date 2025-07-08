@@ -1,4 +1,4 @@
-import type { Feed } from "./models";
+import type { Feed } from "../../abstract/db/models.js";
 
 /**
  * Abstract database interface for managing RSS feeds.
@@ -104,4 +104,4 @@ export abstract class Database {
 }
 
 
-export type { Feed, GuildSettings } from "./models"
+export type { Feed, GuildSettings } from "../../abstract/db/models.js"

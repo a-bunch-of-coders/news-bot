@@ -1,4 +1,4 @@
-import type { Database } from "./abstract/db";
+import type { Database } from "./impl/db/abstract.js";
 
 
 // not the best fix, but oh well.

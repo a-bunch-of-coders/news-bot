@@ -1,3 +1,4 @@
+import { PathLike } from "fs";
 import * as fs from "fs/promises";
 import {jsonc} from "jsonc";
 import { z } from "zod";
@@ -29,7 +30,7 @@ export function validateConfig(config: unknown): Config {
   return result.data;
 }
 
-function generateConfig(configPath: string): Config {
+function generateConfig(configPath: PathLike): Config {
   const defaultConfig: Config = configSchema.parse({});
   try {
     fs.writeFile(configPath, JSON.stringify(defaultConfig, null, 2));
@@ -43,7 +44,7 @@ function generateConfig(configPath: string): Config {
   return defaultConfig;
 }
 
-export async function ensureConfig(configPath: string): Promise<Config> {
+export async function ensureConfig(configPath: PathLike): Promise<Config> {
   // Check if the config file exists
   try {
     await fs.access(configPath);
@@ -54,6 +55,16 @@ export async function ensureConfig(configPath: string): Promise<Config> {
   }
 
 
+  // convert path to string
+  if (configPath instanceof URL) {
+    configPath = configPath.pathname;
+  }
+
+  if (typeof configPath !== "string") {
+    throw new Error("Config path must be a string or URL");
+  }
+
+  console.log(`Loading wqwrqwqwfqewfconfiguration from ${configPath}`);
   // Load the config file
   const configFile = await jsonc.read(configPath);
 

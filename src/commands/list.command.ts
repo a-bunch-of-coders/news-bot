@@ -21,7 +21,7 @@ import {
   Slash,
 } from "discordx";
 
-import { Feed as FeedModel } from "../abstract/db";
+import { Feed as FeedModel } from "../impl/db/abstract.js";
 
 const FEEDS_PER_PAGE = 10;
 
