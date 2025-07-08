@@ -1,27 +1,21 @@
 import type { Feed } from "./models";
-
 /**
  * Abstract database interface for managing RSS feeds.
  * Concrete implementations should handle connection details and execute these operations.
- * 
+ *
  * Note: slightly outdated due to finding out about Knex.
  */
-export abstract class Database {
-
+export declare abstract class Database {
     /**
      * Handle initialization of the database.
-     * 
+     *
      * This should include any necessary setup like connecting to the database,
      * creating tables, etc. The implementation should return an instance of the concrete Database subclass.
-     * 
+     *
      * @param args - Any arguments needed for initialization, such as connection details.
      * @returns A promise that resolves to an instance of the concrete Database subclass.
      */
-    static initialize(...args: any[]): Promise<Database> { // eslint-disable-line @typescript-eslint/no-unused-vars
-        throw new Error("Database.initialize() must be implemented by a concrete subclass.");
-    }
-
-
+    static initialize(...args: any[]): Promise<Database>;
     /**
      * Insert a new feed into the database.
      *
@@ -31,14 +25,7 @@ export abstract class Database {
      * @param title - Optional title of the feed.
      * @param webhookUrl - Optional webhook URL for posting updates.
      */
-    abstract add(
-        guildId: string,
-        channelId: string,
-        url: string,
-        title?: string | null,
-        webhookUrl?: string | null
-    ): Promise<void>;
-
+    abstract add(guildId: string, channelId: string, url: string, title?: string | null, webhookUrl?: string | null): Promise<void>;
     /**
      * Remove a feed by guild and URL.
      *
@@ -47,7 +34,6 @@ export abstract class Database {
      * @returns True if a row was deleted; false otherwise.
      */
     abstract remove(guildId: string, url: string): Promise<boolean>;
-
     /**
      * Retrieve all feeds for a specific guild.
      *
@@ -55,14 +41,12 @@ export abstract class Database {
      * @returns An array of Feed objects, ordered by their database ID.
      */
     abstract guild(guildId: string): Promise<Feed[]>;
-
     /**
      * Retrieve all feeds in the database.
      *
      * @returns An array of all Feed objects.
      */
     abstract feeds(): Promise<Feed[]>;
-
     /**
      * Find a single feed by its URL.
      *
@@ -70,7 +54,6 @@ export abstract class Database {
      * @returns The Feed if found, or null if not present.
      */
     abstract find(url: string): Promise<Feed | null>;
-
     /**
      * Update the last-updated timestamp and optional last-item date for a feed.
      *
@@ -78,7 +61,6 @@ export abstract class Database {
      * @param lastItemDate - The publication date of the latest item, if any.
      */
     abstract update(id: number, lastItemDate?: string | null): Promise<void>;
-
     /**
      * Check whether a feed exists for a given guild and URL.
      *
@@ -87,7 +69,6 @@ export abstract class Database {
      * @returns True if at least one matching feed exists; false otherwise.
      */
     abstract exists(guildId: string, url: string): Promise<boolean>;
-
     /**
      * Check for a duplicate feed (same guild, channel, and URL).
      *
@@ -96,12 +77,6 @@ export abstract class Database {
      * @param url - The RSS feed URL.
      * @returns True if such a feed already exists; false otherwise.
      */
-    abstract duplicate(
-        guildId: string,
-        channelId: string,
-        url: string
-    ): Promise<boolean>;
+    abstract duplicate(guildId: string, channelId: string, url: string): Promise<boolean>;
 }
-
-
-export type { Feed, GuildSettings } from "./models"
+export type { Feed, GuildSettings } from "./models";

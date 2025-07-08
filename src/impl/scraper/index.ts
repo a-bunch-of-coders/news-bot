@@ -1,12 +1,12 @@
 import type { Client} from "discord.js";
 import { EmbedBuilder,TextChannel } from "discord.js";
 import pLimit from "p-limit";
+import { parse } from "path";
 import { URL } from "url";
 
 import type { Database, Feed as DbFeed } from "../../abstract/db";
 import { clean,description as parserDescription, parseFeed, title as parserTitle, truncate } from "./parser";
 import { extractImage, fetchSingle, validateImageUrl } from "./utils";
-import { parse } from "path";
 
 // Global lock and posted articles tracking
 let feedCheckLock = false;

@@ -1,16 +1,16 @@
 import './types'
+
 import { join } from 'path';
 
 import { buildClient } from './client';
 import { ensureConfig } from './config';
 import { initSqliteDB as initDB } from './impl/db';
-
 import { check } from './impl/scraper';
 
 async function main() {
 
 	// join(__dirname, "../config/config.jsonc")
-	const path = join(__dirname, '../config/config.jsonc');
+	const path = join(import.meta.url, '../config/config.jsonc');
 
 	const config = await ensureConfig(path);
 	console.log('Configuration loaded successfully:', config);

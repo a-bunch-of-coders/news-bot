@@ -76,6 +76,13 @@ export class ListCommand {
 
     const totalPages = Math.ceil(feeds.length / FEEDS_PER_PAGE);
     const [_, action, pageStr] = interaction.customId.split("_");
+    if (pageStr === undefined) {
+        await interaction.reply({
+            content: "Invalid pagination action.",
+            ephemeral: true,
+            });
+        return;
+    }
     const currentPage = parseInt(pageStr, 10);
 
     if (action === "jump") {
@@ -121,6 +128,15 @@ export class ListCommand {
 
     const totalPages = Math.ceil(feeds.length / FEEDS_PER_PAGE);
     const selected = interaction.values[0];
+
+    if (!selected || isNaN(parseInt(selected, 10))) {
+      await interaction.reply({
+        content: "Invalid page selection.",
+        ephemeral: true,
+      });
+      return;
+    }
+
     const requestedPage = parseInt(selected, 10) - 1;
     const page = Math.min(Math.max(requestedPage, 0), totalPages - 1);
 

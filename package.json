@@ -5,11 +5,12 @@
   "main": "dist/index.js",
   "repository": "https://github.com/a-bunch-of-coders/news-bot.git",
   "author": "Rocco A <43506958+GenerelSchwerz@users.noreply.github.com>",
-  "license": "None",
+  "license": "MIT",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
+    "dev": "tsx src/index.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "test": "ts-mocha --project tsconfig.json --extensions ts \"test/**/*test.ts\""

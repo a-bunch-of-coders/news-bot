@@ -1,3 +1,4 @@
+import 'ts-node/register/transpile-only';
 import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {

@@ -1,6 +1,7 @@
 import { importx } from "@discordx/importer";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
+
 import type { Database } from "./abstract/db";
 import type { Config } from "./config";
 

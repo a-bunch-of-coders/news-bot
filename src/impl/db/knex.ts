@@ -1,6 +1,6 @@
 // src/database/KnexDatabase.ts
 import type { Knex} from "knex";
-import { knex } from "knex";
+import {default as knex} from "knex";
 
 import type { Feed } from "../../abstract/db";
 import { Database } from "./../../abstract/db";
@@ -20,8 +20,8 @@ export class KnexDatabase extends Database {
     }
 
     async add(
-        guildId: number,
-        channelId: number,
+        guildId: string,
+        channelId: string,
         url: string,
         title?: string | null,
         webhookUrl?: string | null
@@ -37,14 +37,14 @@ export class KnexDatabase extends Database {
         });
     }
 
-    async remove(guildId: number, url: string): Promise<boolean> {
+    async remove(guildId: string, url: string): Promise<boolean> {
         const count = await this.db("feeds")
             .where({ guild_id: guildId, url })
             .delete();
         return count > 0;
     }
 
-    async guild(guildId: number): Promise<Feed[]> {
+    async guild(guildId: string): Promise<Feed[]> {
         return this.db<Feed>("feeds")
             .select(
                 "id",
@@ -99,7 +99,7 @@ export class KnexDatabase extends Database {
             });
     }
 
-    async exists(guildId: number, url: string): Promise<boolean> {
+    async exists(guildId: string, url: string): Promise<boolean> {
         const row = await this.db("feeds")
             .where({ guild_id: guildId, url })
             .count<{ count: string }>("id as count")
@@ -111,8 +111,8 @@ export class KnexDatabase extends Database {
     }
 
     async duplicate(
-        guildId: number,
-        channelId: number,
+        guildId: string,
+        channelId: string,
         url: string
     ): Promise<boolean> {
         const row = await this.db("feeds")
