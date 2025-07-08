@@ -33,7 +33,7 @@ export async function fetchSingle(urlStr: string): Promise<string> {
       const { statusCode } = res;
       if (!statusCode || statusCode < 200 || statusCode >= 300) {
         res.resume(); // consume response to free memory
-        return reject(new Error(`HTTP ${statusCode}`));
+        reject(new Error(`HTTP ${statusCode}`)); return;
       }
 
       let totalLength = 0;
@@ -43,7 +43,7 @@ export async function fetchSingle(urlStr: string): Promise<string> {
         totalLength += chunk.length;
         if (totalLength > MAX_FEED_SIZE) {
           req.destroy();
-          return reject(new Error(`Feed too large: ${totalLength} bytes`));
+          reject(new Error(`Feed too large: ${totalLength} bytes`)); return;
         }
         chunks.push(chunk);
       });
@@ -54,7 +54,7 @@ export async function fetchSingle(urlStr: string): Promise<string> {
       });
     });
 
-    req.on('error', (err) => reject(err));
+    req.on('error', (err) => { reject(err); });
 
     req.setTimeout(TIMEOUT_MS, () => {
       req.destroy();

@@ -1,4 +1,4 @@
-import { Config } from "../../config";
+import type { Config } from "../../config";
 import { KnexDatabase } from "./knex";
 
 
@@ -8,7 +8,9 @@ export default async function initializeDatabase(config: Config): Promise<KnexDa
         return await KnexDatabase.initialize({
             client: "pg",
             connection: config.database.url,
-            migrations: { directory: "./migrations" }
+            migrations: { 
+                extension: 'ts',
+                directory: "./migrations/knex" }
         });
     } catch (error) {
         console.error("Failed to initialize database:", error);

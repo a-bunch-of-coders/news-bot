@@ -1,10 +1,9 @@
-import { ensureConfig } from './config';
-import { buildClient } from './client';
-
-
-import { initPostgresDB } from './impl/db';
-
+import './types'
 import { join } from 'path';
+
+import { buildClient } from './client';
+import { ensureConfig } from './config';
+import { initSqliteDB as initDB } from './impl/db';
 
 async function main() {
 
@@ -15,8 +14,8 @@ async function main() {
 	console.log('Configuration loaded successfully:', config);
 
 
-	const db = await initPostgresDB(config);
-	console.log('Database initialized successfully:', db);
+	const db = await initDB(config);
+	console.log('Database initialized successfully:');
 
 
 	const client = await buildClient(config, db);

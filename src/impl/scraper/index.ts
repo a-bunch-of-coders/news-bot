@@ -1,9 +1,11 @@
-import { Database, Feed as DbFeed } from "../../abstract/db";
-import { Client, TextChannel, EmbedBuilder } from "discord.js";
-import { fetchSingle, extractImage, validateImageUrl } from "./utils";
-import { parseFeed, title as parserTitle, description as parserDescription, truncate, clean } from "./parser";
+import type { Client} from "discord.js";
+import { EmbedBuilder,TextChannel } from "discord.js";
 import pLimit from "p-limit";
 import { URL } from "url";
+
+import type { Database, Feed as DbFeed } from "../../abstract/db";
+import { clean,description as parserDescription, parseFeed, title as parserTitle, truncate } from "./parser";
+import { extractImage, fetchSingle, validateImageUrl } from "./utils";
 
 // Global lock and posted articles tracking
 let feedCheckLock = false;
@@ -33,7 +35,7 @@ export async function check(database: Database, client: Client): Promise<void> {
         try {
           const count = await Promise.race([
             processFeed(feed, database, client),
-            new Promise<number>((_, reject) => setTimeout(() => reject(new Error("Timeout")), 45_000))
+            new Promise<number>((_, reject) => setTimeout(() => { reject(new Error("Timeout")); }, 45_000))
           ]);
           return { url: feed.url, ok: true, count };
         } catch (error: any) {
@@ -77,17 +79,14 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
   // Fetch content with timeout
   let content: string;
   try {
-    content = await Promise.race([
-      fetchSingle(feed.url),
-      new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Timeout fetching feed")), 15_000))
-    ]);
+    content = await fetchSingle(feed.url);
   } catch (e: any) {
     console.warn(`Failed to fetch ${feed.url}: ${e}`);
     throw e;
   }
 
   const parsed = await parseFeed(content);
-  const total = parsed.entries.length;
+  const total = parsed.root.children[0].children.length;
   if (total === 0) {
     console.info(`Feed ${feed.url} is empty`);
     return 0;
@@ -100,7 +99,7 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
   const itemsToCheck = feed.last_item_date ? Math.min(3, total) : 1;
 
   // Sort descending by publish/update date
-  const entries = [...parsed.entries].sort((a, b) => {
+  const entries = [...parsed.root.children[0].children].sort((a, b) => {
     const da = (a.published || a.updated)?.getTime() ?? 0;
     const db = (b.published || b.updated)?.getTime() ?? 0;
     return db - da;

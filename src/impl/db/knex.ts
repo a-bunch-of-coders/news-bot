@@ -1,7 +1,9 @@
 // src/database/KnexDatabase.ts
-import { Knex, knex } from "knex";
+import type { Knex} from "knex";
+import { knex } from "knex";
+
+import type { Feed } from "../../abstract/db";
 import { Database } from "./../../abstract/db";
-import { Feed } from "../../abstract/db";
 
 export class KnexDatabase extends Database {
     private readonly db: Knex;

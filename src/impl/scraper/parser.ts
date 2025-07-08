@@ -11,8 +11,7 @@ const ASIDE_BLOCK_REGEX = /aside_block\s+<[^>]*>/g;
 const OBJECT_REFERENCE_REGEX = /<[^>]*object at 0x[a-fA-F0-9]+>/g;
 const ENCODED_ENTITIES_REGEX = /&#\d+;/g;
 
-import { createTree } from 'xml-trap';
-
+const { createTree } = require('xml-trap');
 
 export function clean(input: string): string {
   if (!input) return '';
@@ -77,7 +76,7 @@ function normalizeWhitespace(input: string): string {
 }
 
 function formatText(input: string): string {
-  const patterns: Array<[RegExp, string]> = [
+  const patterns: [RegExp, string][] = [
     [/\[\u2026\]/g, ''],
     [/\[\.\.\.\]/g, ''],
     [/Read More\.\.\..*$/g, ''],

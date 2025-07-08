@@ -1,9 +1,8 @@
+import { importx } from "@discordx/importer";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
-import { Config } from "./config";
-
-import { Database } from "./abstract/db";
-import { CustomClient } from "./types";
+import type { Database } from "./abstract/db";
+import type { Config } from "./config";
 
 
 export async function buildClient(config: Config, db: Database): Promise<Client> {
@@ -14,14 +13,23 @@ export async function buildClient(config: Config, db: Database): Promise<Client>
 			IntentsBitField.Flags.GuildMembers,
 		],
 		silent: false,
-	}) as CustomClient;
+	}) ;
 
 	client.on("ready", async () => {
 		console.log(">> Bot started");
 
 		// to create/update/delete discord application commands
 		await client.initApplicationCommands();
+
+
 	});
+	client.on("interactionCreate", (interaction) => {
+		client.executeInteraction(interaction);
+	});
+
+	console.log(`>> Importing commands from ${__dirname}/commands/**/*.{js,ts}`);
+
+	await importx(`${__dirname}/commands/**/*.{js,ts}`);
 
 	await client.login(config.bot.token);
 
@@ -30,5 +38,6 @@ export async function buildClient(config: Config, db: Database): Promise<Client>
 
 	return client;
 }
+
 
 

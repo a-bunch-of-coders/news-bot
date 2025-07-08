@@ -1,4 +1,4 @@
-import { Feed } from "./models";
+import type { Feed } from "./models";
 
 /**
  * Abstract database interface for managing RSS feeds.
@@ -17,7 +17,7 @@ export abstract class Database {
      * @param args - Any arguments needed for initialization, such as connection details.
      * @returns A promise that resolves to an instance of the concrete Database subclass.
      */
-    static async initialize(...args: any[]): Promise<Database> {
+    static initialize(...args: any[]): Promise<Database> { // eslint-disable-line @typescript-eslint/no-unused-vars
         throw new Error("Database.initialize() must be implemented by a concrete subclass.");
     }
 
@@ -104,4 +104,4 @@ export abstract class Database {
 }
 
 
-export { Feed, GuildSettings } from "./models"
+export type { Feed, GuildSettings } from "./models"
