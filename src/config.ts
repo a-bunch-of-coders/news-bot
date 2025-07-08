@@ -1,4 +1,4 @@
-import { PathLike } from "fs";
+import type { PathLike } from "fs";
 import * as fs from "fs/promises";
 import {jsonc} from "jsonc";
 import { z } from "zod";

@@ -70,7 +70,7 @@ export function extractImage(entry: any): string | null {
   const html = entry.content?.body || entry.summary?.content;
   if (!html) return null;
   const match = /<img[^>]+src=["']([^"']+)["'][^>]*>/i.exec(html);
-  if (!match || !match[1]) return null;
+  if (!match?.[1]) return null;
 
   if (match && validateImageUrl(match[1])) {
     return match[1];

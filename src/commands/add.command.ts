@@ -1,10 +1,11 @@
 // src/commands/feed.command.ts
 
+import type {
+  CommandInteraction,
+  TextChannel} from "discord.js";
 import {
   ApplicationCommandOptionType,
-  ChannelType,
-  CommandInteraction,
-  TextChannel,
+  ChannelType
 } from "discord.js";
 import {
   Discord,

@@ -1,4 +1,4 @@
-import { importx, dirname, isESM } from "@discordx/importer";
+import { dirname, importx, isESM } from "@discordx/importer";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
 

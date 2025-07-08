@@ -1,13 +1,14 @@
+import type {
+  ButtonInteraction,
+  CommandInteraction,
+  ModalSubmitInteraction,
+  SelectMenuInteraction} from "discord.js";
 import {
   ActionRowBuilder,
   ButtonBuilder,
-  ButtonInteraction,
   ButtonStyle,
-  CommandInteraction,
   EmbedBuilder,
   ModalBuilder,
-  ModalSubmitInteraction,
-  SelectMenuInteraction,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   TextInputBuilder,
@@ -21,7 +22,7 @@ import {
   Slash,
 } from "discordx";
 
-import { Feed as FeedModel } from "../impl/db/abstract.js";
+import type { Feed as FeedModel } from "../impl/db/abstract.js";
 
 const FEEDS_PER_PAGE = 10;
 
