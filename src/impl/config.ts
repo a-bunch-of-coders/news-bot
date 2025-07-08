@@ -55,9 +55,7 @@ export async function ensureConfig(configPath: string): Promise<Config> {
 
 
   // Load the config file
-  const configFile = await jsonc.read(
-    configPath
-  )
+  const configFile = await jsonc.read(configPath);
 
   // Validate the config
   return validateConfig(configFile);
