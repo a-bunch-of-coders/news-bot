@@ -45,15 +45,12 @@ function generateConfig(configPath: PathLike): Config {
 }
 
 export async function ensureConfig(configPath: PathLike): Promise<Config> {
-  // Check if the config file exists
   try {
     await fs.access(configPath);
   } catch (error) {
-    // If the file does not exist, generate a default config
     console.warn(`Configuration file not found at ${configPath}. Generating default configuration.`);
     return generateConfig(configPath);
   }
-
 
   // convert path to string
   if (configPath instanceof URL) {
@@ -63,8 +60,7 @@ export async function ensureConfig(configPath: PathLike): Promise<Config> {
   if (typeof configPath !== "string") {
     throw new Error("Config path must be a string or URL");
   }
-
-  console.log(`Loading wqwrqwqwfqewfconfiguration from ${configPath}`);
+  
   // Load the config file
   const configFile = await jsonc.read(configPath);
 
