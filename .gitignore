@@ -1,5 +1,7 @@
 yarn.lock
 
+config/**/*
+
 # Logs
 logs
 *.log

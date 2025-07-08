@@ -1,6 +1,2 @@
-function main() {
-  console.log("Hello, World!");
-}
+import { Config, configSchema } from "./impl/config";
 
-
-main();
