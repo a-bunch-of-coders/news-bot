@@ -37,16 +37,16 @@ export abstract class SyncFeedCommand {
       if (url) {
         const newItems = await single(interaction.client, url);
         content = newItems > 0
-          ? `✅ Synced feed and found ${newItems} new items`
-          : "✅ Synced feed, no new items found";
+          ? ` Synced feed and found ${newItems} new items`
+          : " Synced feed, no new items found";
       } else {
         await check(interaction.client);
-        content = "✅ Successfully synced all feeds";
+        content = " Successfully synced all feeds";
       }
     } catch (err: any) {
       content = url
-        ? `❌ Failed to sync feed: ${err.message}`
-        : `❌ Failed to sync feeds: ${err.message}`;
+        ? ` Failed to sync feed: ${err.message}`
+        : ` Failed to sync feeds: ${err.message}`;
     }
 
     await interaction.editReply({ content });

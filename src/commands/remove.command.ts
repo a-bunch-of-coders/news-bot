@@ -34,7 +34,7 @@ export class RemoveFeedCommand {
     try {
       const removed = await interaction.client.db.remove(guildId, url);
       const content = removed
-        ? `✅ Successfully removed RSS feed: ${url}`
+        ? ` Successfully removed RSS feed: ${url}`
         : "RSS feed not found.";
       await interaction.editReply({ content });
     } catch (err: any) {
