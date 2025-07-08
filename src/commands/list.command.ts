@@ -188,6 +188,7 @@ export class ListCommand {
       .map((feed, i) => {
         const idx = start + i + 1;
         const domain = this.extractDomain(feed.url);
+        console.log(feed)
         const last = feed.last_item_date
           ? new Date(feed.last_item_date).toLocaleDateString("en-US", {
               year: "numeric",

@@ -27,7 +27,7 @@ async function main() {
     setInterval(async () => {
         try {
             console.log('Starting periodic check...');
-            await check(db, client);
+            await check(client);
             console.log('Periodic check completed successfully.');
         } catch (error) {
             console.error('Error during periodic check:', error);
@@ -37,7 +37,7 @@ async function main() {
     await client.login(config.bot.token);
 
     // start immediately
-    await check(db, client);
+    await check(client);
 
 
 }
