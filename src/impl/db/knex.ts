@@ -1,7 +1,5 @@
-// src/database/KnexDatabase.ts
 import type { Knex} from "knex";
 import {default as knex} from "knex";
-
 
 import { Database, type Feed } from "./abstract.js";
 

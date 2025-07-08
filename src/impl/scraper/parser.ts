@@ -106,7 +106,6 @@ export function description(entry: {
   summary?: string;
   content?: { body?: string };
 }): string {
-    console.log(entry)
   let desc: string;
   if (entry.summary) {
     desc = clean(entry.summary);

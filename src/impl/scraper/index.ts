@@ -73,7 +73,6 @@ export async function single(database: Database, client: Client, url: string): P
 
 async function processFeed(feed: DbFeed, database: Database, client: Client): Promise<number> {
   console.info(`Checking feed: ${feed.url}`);
-  console.info(feed)
 
   // Fetch content with timeout
   let content: string;

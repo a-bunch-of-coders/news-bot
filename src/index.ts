@@ -12,11 +12,11 @@ async function main() {
     // console.log('Loading configuration from:', path);
 
 	const config = await ensureConfig(path);
-	console.log('Configuration loaded successfully:', config);
+	console.log('Configuration loaded successfully.');
 
 
 	const db = await initDB(config);
-	console.log('Database initialized successfully:');
+	console.log('Database initialized successfully.');
 
 
 	const client = await buildClient(db);

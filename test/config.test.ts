@@ -1,10 +1,4 @@
 import { expect } from 'chai';
-// import * as sinon from 'sinon';
-// import * as os from 'os';
-// import * as path from 'path';
-// import { createRequire } from 'module';
-// import * as fsPromises from 'fs/promises';
-
 import { validateConfig } from '../src/config';
 
 describe('validateConfig', () => {

@@ -69,8 +69,7 @@ export class FeedCommand {
     }
 
     const guildId   = interaction.guild?.id;
-    const channelId = target.id;
-    console.log(`Adding feed ${url} to channel ${channelId} in guild ${guildId}`);
+    const channelId = target.id;;
     if (!guildId) return;
 
     // 3) Check duplicate
