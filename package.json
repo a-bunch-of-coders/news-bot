@@ -13,6 +13,7 @@
     "dev": "tsx src/index.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
+    "sort:imports": "eslint . --ext .ts --fix --fix-type layout",
     "test": "ts-mocha --project tsconfig.json --extensions ts \"test/**/*test.ts\""
   },
   "devDependencies": {

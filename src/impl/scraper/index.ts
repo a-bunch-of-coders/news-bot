@@ -16,7 +16,7 @@ const POSTED_ARTICLES = new Set<string>();
  * Check all feeds with concurrency limit.
  */
 export async function check(client: Client): Promise<void> {
-    const database = client.db as Database;
+    const database = client.db;
     if (feedCheckLock) {
         console.warn("Feed check already in progress, skipping this cycle");
         return;
@@ -99,8 +99,8 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
 
     // Sort descending by publish/update date
     const entries = [...parsed.items].sort((a, b) => {
-        const da = (a.published || a.updated)?.getTime() ?? 0;
-        const db = (b.published || b.updated)?.getTime() ?? 0;
+        const da = (a.published ?? a.updated)?.getTime() ?? 0;
+        const db = (b.published ?? b.updated)?.getTime() ?? 0;
         return db - da;
     });
 
@@ -124,7 +124,7 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
                 newItems++;
                 POSTED_ARTICLES.add(id);
 
-                const d = (entry.published || entry.updated)?.toISOString() ?? null;
+                const d = (entry.published ?? entry.updated)?.toISOString() ?? null;
                 if (d && (!newestDate || d > newestDate)) {
                     newestDate = d;
                 }
@@ -170,7 +170,7 @@ function identifier(entry: any): string {
     }
 
     if (entry.id) parts.push(entry.id);
-    const pd = (entry.published || entry.updated)?.toISOString().slice(0, 10);
+    const pd = (entry.published ?? entry.updated)?.toISOString().slice(0, 10);
     if (pd) parts.push(pd);
 
     if (!parts.length) {
@@ -194,7 +194,7 @@ async function post(feed: DbFeed, entry: any, client: Client): Promise<void> {
 
     const link = entry.links?.[0]?.href;
     if (link) embed.setURL(link);
-    const pd = entry.published || entry.updated;
+    const pd = entry.published ?? entry.updated;
     if (pd) embed.setTimestamp(pd);
     const img = extractImage(entry);
     if (img) embed.setImage(img);

@@ -1,5 +1,6 @@
+import { ApplicationCommandOptionType, type CommandInteraction } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
-import { CommandInteraction, ApplicationCommandOptionType } from "discord.js";
+
 import { check, single } from "../impl/scraper/index.js";
 
 @Discord()
