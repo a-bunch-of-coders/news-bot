@@ -8,6 +8,7 @@ import {
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
+  MessageFlags,
   ModalBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
@@ -39,7 +40,7 @@ export class ListCommand {
     if (!guildId) {
       await interaction.reply({
         content: "This command can only be used in a server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -48,7 +49,7 @@ export class ListCommand {
     if (feeds.length === 0) {
       await interaction.reply({
         content: "No RSS feeds configured for this server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -60,7 +61,7 @@ export class ListCommand {
     await interaction.reply({
       embeds: [embed],
       components,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 
@@ -71,7 +72,7 @@ export class ListCommand {
 
     const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
-      await interaction.reply({ content: "No feeds to page.", ephemeral: true });
+      await interaction.reply({ content: "No feeds to page.", flags: MessageFlags.Ephemeral, });
       return;
     }
 
@@ -80,7 +81,7 @@ export class ListCommand {
     if (pageStr === undefined) {
         await interaction.reply({
             content: "Invalid pagination action.",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
             });
         return;
     }
@@ -123,7 +124,7 @@ export class ListCommand {
 
     const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
-      await interaction.reply({ content: "No feeds to page.", ephemeral: true });
+      await interaction.reply({ content: "No feeds to page.", flags: MessageFlags.Ephemeral, });
       return;
     }
 
@@ -133,7 +134,7 @@ export class ListCommand {
     if (!selected || isNaN(parseInt(selected, 10))) {
       await interaction.reply({
         content: "Invalid page selection.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -152,7 +153,7 @@ export class ListCommand {
 
     const feeds = await interaction.client.db.guild(guildId);
     if (feeds.length === 0) {
-      await interaction.reply({ content: "No feeds to page.", ephemeral: true });
+      await interaction.reply({ content: "No feeds to page.", flags: MessageFlags.Ephemeral, });
       return;
     }
 
@@ -162,7 +163,7 @@ export class ListCommand {
     if (isNaN(parsed) || parsed < 1 || parsed > totalPages) {
       await interaction.reply({
         content: `Invalid page. Please enter a number between 1 and ${totalPages}.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -188,7 +189,6 @@ export class ListCommand {
       .map((feed, i) => {
         const idx = start + i + 1;
         const domain = this.extractDomain(feed.url);
-        console.log(feed)
         const last = feed.last_item_date
           ? new Date(feed.last_item_date).toLocaleDateString("en-US", {
               year: "numeric",

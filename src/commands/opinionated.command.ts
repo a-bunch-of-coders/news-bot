@@ -7,6 +7,8 @@ import type {
 import {
   ApplicationCommandOptionType,
   ChannelType,
+  MessageFlags,
+  PermissionFlagsBits,
 } from "discord.js";
 import {
   Discord,
@@ -51,16 +53,36 @@ export class OpinionatedCommand {
     const guildId = interaction.guild?.id;
     if (!guildId) return;
 
+
     // Channel resolve (match Rust: option OR current channel id)
     const target = channelOption ?? (interaction.channel as TextChannel | null);
     if (!target) {
       await interaction.reply({
         content: "Could not resolve target text channel.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
     const channelId = target.id;
+
+
+    // check "Create webhooks" permission 
+    const botMember = await interaction.guild.members.fetchMe();
+    if (!botMember.permissionsIn(channelId).has(PermissionFlagsBits.ManageWebhooks)) {
+      await interaction.reply({
+        content: "I need the 'Manage Webhooks' permission in the target channel to add feeds.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    // check if webhook exists, otherwise make one
+    const webhooks = await target.fetchWebhooks();
+    let webhook = webhooks.find(wh => wh.owner?.id === interaction.client.user.id);
+    webhook ??= await target.createWebhook({
+        name: "RSS Feed Bot",
+        reason: "Needed for posting RSS feed updates",
+      });
 
     // Load collection
     let collection: OpinionatedCollection;
@@ -69,13 +91,13 @@ export class OpinionatedCommand {
     } catch {
       await interaction.reply({
         content: `Topic '${topic}' not found in curated collections.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     // Defer like Rust
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral, });
 
     let addedCount = 0;
     let skippedCount = 0;
@@ -95,8 +117,8 @@ export class OpinionatedCommand {
           guildId,
           channelId,
           feed.url,
-          feed.name ?? undefined,
-          null,
+          feed.name,
+          webhook.url,
         );
 
         addedCount++;

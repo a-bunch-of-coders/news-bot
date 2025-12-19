@@ -2,10 +2,13 @@
 
 import type {
   CommandInteraction,
-  TextChannel} from "discord.js";
+  TextChannel
+} from "discord.js";
 import {
   ApplicationCommandOptionType,
-  ChannelType
+  ChannelType,
+  MessageFlags,
+  PermissionFlagsBits
 } from "discord.js";
 import {
   Discord,
@@ -17,33 +20,32 @@ import { URL } from "url";
 import { parseFeed } from "../impl/scraper/parser.js";
 import { fetchSingle as fetchFeed } from "../impl/scraper/utils.js";
 
-const FETCH_TIMEOUT_MS   = 15_000;
-const MAX_FEED_SIZE      = 5_000_000;  // 5 MB
-const MAX_ENTRY_COUNT    = 500;
+const FETCH_TIMEOUT_MS = 15_000;
+const MAX_FEED_SIZE = 5_000_000;  // 5 MB
+const MAX_ENTRY_COUNT = 500;
 
 @Discord()
 export class FeedCommand {
   // `Database` should be registered with your DI container (typedi, etc.)
-  constructor() {}
 
   @Slash({
-    name:        "addfeed",
+    name: "addfeed",
     description: "Add an RSS/Atom feed to a text channel",
   })
   async addFeed(
     @SlashOption({
-      name:        "url",
+      name: "url",
       description: "The RSS/Atom feed URL",
-      type:        ApplicationCommandOptionType.String,
-      required:    true,
+      type: ApplicationCommandOptionType.String,
+      required: true,
     })
     url: string,
     @SlashOption({
-      name:        "channel",
+      name: "channel",
       description: "Which channel to post updates in",
-      type:        ApplicationCommandOptionType.Channel,
+      type: ApplicationCommandOptionType.Channel,
       channelTypes: [ChannelType.GuildText],
-      required:    false,
+      required: false,
     })
     channelOption: TextChannel | undefined,
 
@@ -54,7 +56,7 @@ export class FeedCommand {
     try {
       parsedUrl = new URL(url);
     } catch {
-      await interaction.reply({ content: "Invalid URL.", ephemeral: true });
+      await interaction.reply({ content: "Invalid URL.", flags: MessageFlags.Ephemeral, });
       return;
     }
 
@@ -64,26 +66,37 @@ export class FeedCommand {
     if (!target) {
       await interaction.reply({
         content: "Could not resolve target text channel.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
-    const guildId   = interaction.guild?.id;
-    const channelId = target.id;;
-    if (!guildId) return;
-
-    // 3) Check duplicate
-    if (await interaction.client.db.duplicate(guildId, channelId, url)) {
+    // check webhook permissions
+    if (!target.permissionsFor(interaction.client.user)?.has(PermissionFlagsBits.ManageWebhooks)) {
       await interaction.reply({
-        content: `This feed is already added to <#${channelId}>.`,
-        ephemeral: true,
+        content: "I need the 'Manage Webhooks' permission in the target channel to post feed updates.",
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     // 4) Defer reply (gives us more time)
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral, });
+
+
+    const guildId = interaction.guild?.id;
+    const channelId = target.id;;
+    if (!guildId) return;
+
+    // 3) Check duplicate
+    if (await interaction.client.db.duplicate(guildId, url)) {
+      const feed = await interaction.client.db.feed(guildId, url);
+      await interaction.editReply({
+        content: `This feed is already added to <#${feed!.channel_id}>.`,
+      });
+      return;
+    }
+
 
     // 5) Fetch + size‐limit + timeout
     let content: string;
@@ -122,18 +135,29 @@ export class FeedCommand {
       return;
     }
 
+    // check if there is a webhook created by us.
+    const webhooks = await target.fetchWebhooks()
+    const botWebhooks = webhooks.filter(wh => wh.owner?.id === interaction.client.user.id);
+
+    let webhook = botWebhooks.first();
+    // create a webhook
+    webhook ??= await target.createWebhook({
+      name: 'RSS Feed Bot',
+      reason: 'Webhook for posting RSS feed updates',
+    });
+
     // 7) Insert into DB
     await interaction.client.db.add(
       guildId,
       channelId,
       url,
       feed.title ?? undefined,
-      null
+      webhook.url,
     );
 
     // 8) Success message
     const domain = parsedUrl.host;
-    const kb     = (content.length / 1024).toFixed(1);
+    const kb = (content.length / 1024).toFixed(1);
     await interaction.editReply({
       content: `✅ Added \`${domain}\` → <#${channelId}> | ${feed.items.length} items • ${kb} KB`,
     });

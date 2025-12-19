@@ -5,6 +5,8 @@ import type {
   Guild,
   NonThreadGuildBasedChannel,
   StringSelectMenuInteraction,
+  TextChannel,
+  Webhook,
 } from "discord.js";
 import {
   ActionRowBuilder,
@@ -13,6 +15,7 @@ import {
   ButtonStyle,
   ChannelType,
   EmbedBuilder,
+  MessageFlags,
   PermissionFlagsBits,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
@@ -62,14 +65,14 @@ async function createTextChannel(
   guild: Guild,
   name: string,
   parentId: string,
-): Promise<string> {
+): Promise<TextChannel> {
   const channel = await guild.channels.create({
     name,
     type: ChannelType.GuildText,
     parent: parentId,
     permissionOverwrites: [],
   });
-  return channel.id;
+  return channel;
 }
 
 function assertStateOwner(
@@ -113,13 +116,22 @@ export class SetupFeedsCommand {
     if (!me?.permissions.has(PermissionFlagsBits.ManageChannels)) {
       await interaction.reply({
         content: "Missing required permission: Manage Channels",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
+    if (!me.permissions.has(PermissionFlagsBits.ManageWebhooks)) {
+      await interaction.reply({
+        content: "Missing required permission: Manage Webhooks",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+
     // Defer so we can fetch channels without racing the 3s window
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     // Gather categories
     const all = await guild.channels.fetch();
@@ -186,7 +198,7 @@ export class SetupFeedsCommand {
     if (!st) {
       await interaction.reply({
         content: "This setup session isn’t yours (or it expired). Run /setupfeeds again.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -202,7 +214,7 @@ export class SetupFeedsCommand {
     } catch (e: any) {
       await interaction.reply({
         content: `Failed to load available topics: ${e?.message ?? String(e)}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -210,7 +222,7 @@ export class SetupFeedsCommand {
     if (!t.length) {
       await interaction.reply({
         content: "No curated feed collections available.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -263,7 +275,7 @@ export class SetupFeedsCommand {
     if (!st) {
       await interaction.reply({
         content: "This setup session isn’t yours (or it expired). Run /setupfeeds again.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -274,7 +286,7 @@ export class SetupFeedsCommand {
     if (!st.topics.length) {
       await interaction.reply({
         content: "Please select at least one topic.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -292,7 +304,7 @@ export class SetupFeedsCommand {
       } catch (e: any) {
         await interaction.reply({
           content: `Failed to load topic: ${topic}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -342,7 +354,7 @@ export class SetupFeedsCommand {
     if (!st) {
       await interaction.reply({
         content: "This setup session isn’t yours (or it expired).",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -366,7 +378,7 @@ export class SetupFeedsCommand {
     if (!st) {
       await interaction.reply({
         content: "This setup session isn’t yours (or it expired). Run /setupfeeds again.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -423,13 +435,28 @@ export class SetupFeedsCommand {
 
       const channelName = slugifyChannel(topic);
 
-      let channelId: string;
+      let channel: TextChannel;
       try {
-        channelId = await createTextChannel(guild, channelName, actualCategoryId);
+        channel = await createTextChannel(guild, channelName, actualCategoryId);
       } catch {
         channelFields.push({
           name: `${topic} Channel`,
           value: "Failed to create channel",
+          inline: false,
+        });
+        continue;
+      }
+
+      let webhook: Webhook;
+      try {
+        webhook = await channel.createWebhook({
+          name: "RSS Feed Bot",
+          reason: "Needed for posting RSS feed updates",
+        });
+      } catch {
+        channelFields.push({
+          name: `${topic} Channel`,
+          value: "Failed to create webhook",
           inline: false,
         });
         continue;
@@ -448,10 +475,10 @@ export class SetupFeedsCommand {
 
           await interaction.client.db.add(
             guild.id,
-            channelId,
+            channel.id,
             feed.url,
-            feed.name ?? undefined,
-            null,
+            feed.name,
+            webhook.url,
           );
           added++;
         } catch {
@@ -465,7 +492,7 @@ export class SetupFeedsCommand {
 
       channelFields.push({
         name: `${topic} Channel`,
-        value: `<#${channelId}>\n${added} added, ${skipped} skipped, ${failed} failed`,
+        value: `<#${channel.id}>\n${added} added, ${skipped} skipped, ${failed} failed`,
         inline: false,
       });
     }

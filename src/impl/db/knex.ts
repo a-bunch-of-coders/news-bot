@@ -115,6 +115,23 @@ export class KnexDatabase extends Database {
         return raw.map(this.formatFeed);
     }
 
+    async feed(guildId: string, url: string): Promise<Feed | null> {
+        const row = await this.db<Feed>("feeds")
+            .select(
+                "id",
+                "guild_id",
+                "channel_id",
+                "url",
+                "title",
+                "webhook_url",
+                "last_updated",
+                "last_item_date"
+            )
+            .where({ guild_id: guildId, url })
+            .first();
+        return row ? this.formatFeed(row) : null;
+    }
+
     async find(url: string): Promise<Feed | null> {
         const row = await this.db<Feed>("feeds")
             .select(
@@ -154,11 +171,11 @@ export class KnexDatabase extends Database {
 
     async duplicate(
         guildId: string,
-        channelId: string,
+        // channelId: string,
         url: string
     ): Promise<boolean> {
         const row = await this.db("feeds")
-            .where({ guild_id: guildId, channel_id: channelId, url })
+            .where({ guild_id: guildId, url })
             .count<{ count: string }>("id as count")
             .first();
 

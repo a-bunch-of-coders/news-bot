@@ -1,5 +1,5 @@
 import type { Client } from "discord.js";
-import { EmbedBuilder, TextChannel } from "discord.js";
+import { EmbedBuilder, TextChannel, WebhookClient } from "discord.js";
 import pLimit from "p-limit";
 import type Parser from "rss-parser";
 import { URL } from "url";
@@ -238,11 +238,19 @@ function identifier(entry: Parser.Item): string {
 }
 
 async function post(feed: DbFeed, entry: Parser.Item, client: Client): Promise<void> {
+    const webhook = feed.webhook_url
+        ? new WebhookClient({ url: feed.webhook_url })
+        : null;
     const channel = await client.channels.fetch(feed.channel_id.toString());
+
+
+
     if (!channel || !(channel instanceof TextChannel)) {
         console.error(`Failed to fetch channel ${feed.channel_id}: ${channel}`);
         throw new Error(`Invalid channel: ${feed.channel_id}`);
     }
+
+
 
 
     const img = extractImage(entry);
@@ -265,7 +273,13 @@ async function post(feed: DbFeed, entry: Parser.Item, client: Client): Promise<v
 
     for (let attempt = 1; attempt <= 2; attempt++) {
         try {
-            await channel.send({ embeds: [embed] });
+
+            if (webhook) {
+                await webhook.send({ embeds: [embed] });
+            } else {
+                await channel.send({ embeds: [embed] });
+            }
+
             return;
         } catch (e: any) {
             if (attempt === 2) throw new Error(`Failed to send message after 2 attempts: ${e}`);

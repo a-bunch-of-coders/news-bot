@@ -40,6 +40,8 @@ export async function buildClient(db: Database): Promise<Client> {
 	client.on("interactionCreate", (interaction) => {
 		client.executeInteraction(interaction);
 	});
+
+	// imports 
 	const folder = isESM() ? dirname(import.meta.url) : __dirname;
 	const extension = isTypeScriptRuntime() ? "{js,ts}" : "js";
 	const cmdsFull = `${folder}/commands/**/*.${extension}`;

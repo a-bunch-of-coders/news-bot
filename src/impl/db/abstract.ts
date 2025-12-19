@@ -83,6 +83,15 @@ export abstract class Database {
     abstract feeds(): Promise<Feed[]>;
 
     /**
+     * Retrieve the feed given the url and guild ID.
+     * 
+     * @param guildId - The Discord guild ID.
+     * @param url - The RSS feed URL.
+     * @returns The Feed if found, or null if not present.
+     */
+    abstract feed(guildId: string, url: string): Promise<Feed | null>;
+
+    /**
      * Find a single feed by its URL.
      *
      * @param url - The RSS feed URL to look up.
@@ -117,7 +126,7 @@ export abstract class Database {
      */
     abstract duplicate(
         guildId: string,
-        channelId: string,
+        // channelId: string,
         url: string
     ): Promise<boolean>;
 }

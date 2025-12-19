@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, type CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionType, MessageFlags, type CommandInteraction } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 
 import { guild, single } from "../impl/scraper/index.js";
@@ -25,13 +25,13 @@ export abstract class SyncFeedCommand {
     if (!guildId) {
       await interaction.reply({
         content: "This command can only be used in a server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
 
     // Defer reply for async operations
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral, });
 
     let content: string;
     try {

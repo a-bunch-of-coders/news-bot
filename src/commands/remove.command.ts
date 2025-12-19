@@ -1,5 +1,5 @@
 import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, MessageFlags } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 
 // Adjust to your actual Feed type if needed
@@ -72,7 +72,7 @@ export class RemoveFeedCommand {
     if (!interaction.inGuild()) {
       await interaction.reply({
         content: "This command can only be used in a server.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -80,7 +80,7 @@ export class RemoveFeedCommand {
     const guildId = interaction.guildId;
     const channelId = interaction.channelId;
 
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral, });
 
     try {
       // Strongly recommend this is channel-scoped (guildId + channelId + url)

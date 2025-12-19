@@ -109,8 +109,8 @@ export function description(entry: Parser.Item): string {
   } else if (entry.content) {
     if (typeof entry.content === 'string') {
       desc = clean(entry.content);
-    } else if (entry.content.body) {
-      desc = clean(entry.content.body);
+    } else if (entry.contentSnippet) {
+      desc = clean(entry.contentSnippet);
     } else {
       return 'No description available.';
     }
