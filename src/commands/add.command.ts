@@ -31,6 +31,7 @@ export class FeedCommand {
   @Slash({
     name: "addfeed",
     description: "Add an RSS/Atom feed to a text channel",
+    defaultMemberPermissions: PermissionFlagsBits.ManageChannels,
   })
   async addFeed(
     @SlashOption({
