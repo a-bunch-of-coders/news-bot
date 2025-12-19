@@ -35,11 +35,18 @@ export class KnexDatabase extends Database {
         });
     }
 
-    async remove(guildId: string, url: string): Promise<boolean> {
+    async remove(guildId: string, channelId: string, url: string): Promise<boolean> {
         const count = await this.db("feeds")
-            .where({ guild_id: guildId, url })
+            .where({ guild_id: guildId, channel_id: channelId, url })
             .delete();
         return count > 0;
+    }
+
+    async removeChannelFeeds(guildId: string, channelId: string): Promise<number> {
+        const count = await this.db("feeds")
+            .where({ guild_id: guildId, channel_id: channelId })
+            .delete();
+        return count;
     }
 
     async guild(guildId: string): Promise<Feed[]> {
@@ -55,6 +62,22 @@ export class KnexDatabase extends Database {
                 "last_item_date"
             )
             .where({ guild_id: guildId })
+            .orderBy("id");
+    }
+
+    async channel(guildId: string, channelId: string): Promise<Feed[]> {
+        return this.db<Feed>("feeds")
+            .select(
+                "id",
+                "guild_id",
+                "channel_id",
+                "url",
+                "title",
+                "webhook_url",
+                "last_updated",
+                "last_item_date"
+            )
+            .where({ guild_id: guildId, channel_id: channelId })
             .orderBy("id");
     }
 
@@ -89,6 +112,7 @@ export class KnexDatabase extends Database {
     }
 
     async update(id: number, lastItemDate?: string | null): Promise<void> {
+        console.log(`Updating feed id=${id} lastItemDate=${lastItemDate}`);
         await this.db("feeds")
             .where({ id })
             .update({

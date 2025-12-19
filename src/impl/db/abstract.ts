@@ -43,10 +43,20 @@ export abstract class Database {
      * Remove a feed by guild and URL.
      *
      * @param guildId - The Discord guild ID.
+     * @param channelId - The Discord channel ID.
      * @param url - The RSS feed URL to remove.
      * @returns True if a row was deleted; false otherwise.
      */
-    abstract remove(guildId: string, url: string): Promise<boolean>;
+    abstract remove(guildId: string, channelId: string, url: string): Promise<boolean>;
+
+    /**
+     * Remove all feeds for a specific channel.
+     * 
+     * @param guildId - The Discord guild ID.
+     * @param channelId - The Discord channel ID.
+     * @return The number of feeds removed.
+     */
+    abstract removeChannelFeeds(guildId: string, channelId: string): Promise<number>;
 
     /**
      * Retrieve all feeds for a specific guild.
@@ -55,6 +65,15 @@ export abstract class Database {
      * @returns An array of Feed objects, ordered by their database ID.
      */
     abstract guild(guildId: string): Promise<Feed[]>;
+
+    /**
+     * Retrieve all feeds for a specific channel in a guild.
+     *
+     * @param guildId - The Discord guild ID.
+     * @param channelId - The Discord channel ID.
+     * @returns An array of Feed objects, ordered by their database ID.
+     */
+    abstract channel(guildId: string, channelId: string): Promise<Feed[]>;
 
     /**
      * Retrieve all feeds in the database.

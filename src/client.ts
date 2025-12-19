@@ -42,10 +42,16 @@ export async function buildClient(db: Database): Promise<Client> {
 	});
 	const folder = isESM() ? dirname(import.meta.url) : __dirname;
 	const extension = isTypeScriptRuntime() ? "{js,ts}" : "js";
-	const full = `${folder}/commands/**/*.${extension}`;
+	const cmdsFull = `${folder}/commands/**/*.${extension}`;
 
-	await importx(full);
-	console.log(`>> Importing commands from ${full}`);
+	await importx(cmdsFull);
+	console.log(`>> Importing commands from ${cmdsFull}`);
+
+
+	const eventsFull = `${folder}/events/**/*.${extension}`;
+	await importx(eventsFull);
+	console.log(`>> Importing events from ${eventsFull}`);
+
 
 	// so everywhere in the code we can use client.db
 	client.db = db;
