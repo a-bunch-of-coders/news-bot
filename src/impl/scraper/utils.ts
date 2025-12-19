@@ -1,5 +1,6 @@
 import { request as httpRequest } from 'http';
 import { request as httpsRequest } from 'https';
+import Parser from 'rss-parser';
 import { URL } from 'url';
 
 const MAX_FEED_SIZE = 5_000_000; // 5 MB
@@ -98,8 +99,8 @@ export async function fetchSingle(
 
 
 
-export function extractImage(entry: any): string | null {
-  const html = entry.content?.body || entry.summary?.content;
+export function extractImage(entry: Parser.Item): string | null {
+  const html = entry.content?.toString();
   if (!html) return null;
   const match = /<img[^>]+src=["']([^"']+)["'][^>]*>/i.exec(html);
   if (!match?.[1]) return null;

@@ -17,6 +17,21 @@ export class KnexDatabase extends Database {
         return new KnexDatabase(db);
     }
 
+    /**
+     * By default, knex returns strings, not Dates.
+     * 
+     * 
+     * @param raw 
+     * @returns 
+     */
+    private formatFeed = (raw: Feed): Feed => {
+        return {
+            ...raw,
+            last_updated: new Date(raw.last_updated),
+            last_item_date: raw.last_item_date ? new Date(raw.last_item_date) : null,
+        }
+    }
+
     async add(
         guildId: string,
         channelId: string,
@@ -50,7 +65,7 @@ export class KnexDatabase extends Database {
     }
 
     async guild(guildId: string): Promise<Feed[]> {
-        return this.db<Feed>("feeds")
+        const raw = await this.db<Feed>("feeds")
             .select(
                 "id",
                 "guild_id",
@@ -63,10 +78,12 @@ export class KnexDatabase extends Database {
             )
             .where({ guild_id: guildId })
             .orderBy("id");
+
+        return raw.map(this.formatFeed);
     }
 
     async channel(guildId: string, channelId: string): Promise<Feed[]> {
-        return this.db<Feed>("feeds")
+        const raw = await this.db<Feed>("feeds")
             .select(
                 "id",
                 "guild_id",
@@ -78,11 +95,13 @@ export class KnexDatabase extends Database {
                 "last_item_date"
             )
             .where({ guild_id: guildId, channel_id: channelId })
-            .orderBy("id");
+            .orderBy("id"); 
+
+        return raw.map(this.formatFeed);
     }
 
     async feeds(): Promise<Feed[]> {
-        return this.db<Feed>("feeds").select(
+        const raw = await this.db<Feed>("feeds").select(
             "id",
             "guild_id",
             "channel_id",
@@ -92,6 +111,8 @@ export class KnexDatabase extends Database {
             "last_updated",
             "last_item_date"
         );
+
+        return raw.map(this.formatFeed);
     }
 
     async find(url: string): Promise<Feed | null> {
@@ -108,11 +129,10 @@ export class KnexDatabase extends Database {
             )
             .where({ url })
             .first();
-        return row ?? null;
+        return row ? this.formatFeed(row) : null;
     }
 
     async update(id: number, lastItemDate?: string | null): Promise<void> {
-        console.log(`Updating feed id=${id} lastItemDate=${lastItemDate}`);
         await this.db("feeds")
             .where({ id })
             .update({

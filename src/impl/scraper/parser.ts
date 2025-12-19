@@ -98,14 +98,11 @@ function formatText(input: string): string {
   return patterns.reduce((txt, [regex, repl]) => txt.replace(regex, repl), input);
 }
 
-export function title(entry: { title?: string }): string {
+export function title(entry: Parser.Item): string {
   return entry.title ? clean(entry.title) : 'Untitled';
 }
 
-export function description(entry: {
-  summary?: string;
-  content?: { body?: string };
-}): string {
+export function description(entry: Parser.Item): string {
   let desc: string;
   if (entry.summary) {
     desc = clean(entry.summary);
