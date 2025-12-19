@@ -34,6 +34,7 @@ export async function check(client: Client): Promise<void> {
         const tasks = feeds.map(feed =>
             limit(async () => {
                 try {
+
                     const count = await processFeed(feed, database, client);
                     return { url: feed.url, ok: true, count };
                 } catch (error: any) {
@@ -60,11 +61,49 @@ export async function check(client: Client): Promise<void> {
     }
 }
 
+export async function guild(client: Client, guildId: string): Promise<number> {
+    // don't care about the lock here, guild-specific checks can run concurrently
+
+    const database = client.db;
+    const feeds = await database.guild(guildId);
+    console.info(`Checking ${feeds.length} feeds for guild ${guildId}`);
+    if (feeds.length === 0) {
+        console.info(`No feeds to check for guild ${guildId}`);
+        return 0;
+    }
+
+    let totalNewItems = 0;
+    const limit = pLimit(4);
+    const tasks = feeds.map(feed =>
+        limit(async () => {
+            try {
+                const count = await processFeed(feed, database, client);
+                return count;
+            } catch (error: any) {
+                if (error.message === "Timeout") {
+                    console.warn(`Feed check timed out: ${feed.url}`);
+                } else {
+                    console.error(`Failed to check ${feed.url}: ${error}`);
+                }
+                return 0;
+            }
+        })
+    );
+
+    const results = await Promise.all(tasks);
+    for (const count of results) {
+        totalNewItems += count;
+    }
+
+    console.info(`Guild feed check complete for ${guildId}: ${totalNewItems} new items posted`);
+    return totalNewItems;
+}
+
 /**
  * Process a single feed by URL, returns new item count
  */
 export async function single(client: Client, url: string): Promise<number> {
-    const database = client.db as Database;
+    const database = client.db;
     const feed = await database.find(url);
     if (!feed) {
         throw new Error(`Feed not found: ${url}`);
@@ -114,7 +153,7 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
         }
 
         const shouldPost = feed.last_item_date
-            ? ((entry.published || entry.updated)?.toISOString() ?? "") > feed.last_item_date
+            ? ((entry.published ?? entry.updated)?.toISOString() ?? "") > feed.last_item_date
             : newItems === 0;
 
         if (shouldPost) {
@@ -152,7 +191,7 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
 
 function identifier(entry: any): string {
     const parts: string[] = [];
-    const t = parserTitle(entry)?.trim().toLowerCase().replace(/[\n\r\t:!\?\.,;\-–—]/g, " ");
+    const t = parserTitle(entry).trim().toLowerCase().replace(/[\n\r\t:!\?\.,;\-–—]/g, " ");
     if (t) {
         const words = t.split(/\s+/).filter(w => w.length > 2);
         if (words.length) parts.push(words.join(" "));

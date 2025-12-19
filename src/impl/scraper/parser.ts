@@ -166,15 +166,34 @@ export function truncate(text: string, maxLength: number): string {
 
 
 
-export function parseFeed(content: string) {
-    // const text = content.trim().replaceAll(/(\s*)([\\]n)(\s*)/g, "").trim()
+// export async function parseFeed(content: string) {
+//     // const text = content.trim().replaceAll(/(\s*)([\\]n)(\s*)/g, "").trim()
 
-    const text = content.trim().replace(/\s+/g, ' ').replace(/\\n/g, '\n').replace(/\\t/g, '\t').trim();
-    if (!text) {
-        throw new Error("Content is empty or whitespace only");
-    }
-    // const tree = createTree(text);
-    const parser = new Parser();
-    const tree = parser.parseString(text);
-    return tree;
+//     const text = content.trim().replace(/\s+/g, ' ').replace(/\\n/g, '\n').replace(/\\t/g, '\t').trim();
+//     if (!text) {
+//         throw new Error("Content is empty or whitespace only");
+//     }
+//     // const tree = createTree(text);
+//     const parser = new Parser();
+//     const tree = await parser.parseString(text);
+//     return tree;
+// }
+
+
+export async function parseFeed(content: string) {
+  const raw = content.trim();
+  if (!raw) throw new Error("Content is empty or whitespace only");
+
+  // If the feed body looks like it was JSON-escaped (very uncommon), fix only then.
+  // Heuristic: lots of '\\n' but no actual '\n'
+  const looksEscaped = raw.includes("\\n") && !raw.includes("\n");
+  const text = looksEscaped ? raw.replace(/\\n/g, "\n").replace(/\\t/g, "\t") : raw;
+  const parser = new Parser({
+    // Helps rss-parser pick common fields
+    // customFields: {
+    //   item: ["content:encoded", "media:content", "media:thumbnail", "enclosure"],
+    // },
+  });
+
+  return await parser.parseString(text);
 }

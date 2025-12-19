@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, type CommandInteraction } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 
-import { check, single } from "../impl/scraper/index.js";
+import { guild, single } from "../impl/scraper/index.js";
 
 @Discord()
 export abstract class SyncFeedCommand {
@@ -41,7 +41,7 @@ export abstract class SyncFeedCommand {
           ? ` Synced feed and found ${newItems} new items`
           : " Synced feed, no new items found";
       } else {
-        await check(interaction.client);
+        await guild(interaction.client, guildId);
         content = " Successfully synced all feeds";
       }
     } catch (err: any) {

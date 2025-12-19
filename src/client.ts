@@ -7,8 +7,8 @@ import type { Database } from "./impl/db/abstract.js";
 
 // basic.
 function isTypeScriptRuntime(): boolean {
-  const entry = process.argv[1] ?? "";
-  return entry.endsWith(".ts");
+	const entry = process.argv[1] ?? "";
+	return entry.endsWith(".ts");
 }
 
 export async function buildClient(db: Database): Promise<Client> {
@@ -25,11 +25,15 @@ export async function buildClient(db: Database): Promise<Client> {
 		silent: false,
 	});
 
-	client.on("ready", async () => {
+	client.on("ready", () => {
 		console.log(">> Bot started");
 
 		// to create/update/delete discord application commands
-		await client.initApplicationCommands();
+		client.initApplicationCommands().catch((error: unknown) => {
+			console.error(">> Failed to initialize application commands:", error);
+		}).finally(() => {
+			console.log(">> Application commands initialized");
+		});
 
 
 	});
@@ -38,7 +42,7 @@ export async function buildClient(db: Database): Promise<Client> {
 	});
 	const folder = isESM() ? dirname(import.meta.url) : __dirname;
 	const extension = isTypeScriptRuntime() ? "{js,ts}" : "js";
-    const full = `${folder}/commands/**/*.${extension}`;
+	const full = `${folder}/commands/**/*.${extension}`;
 
 	await importx(full);
 	console.log(`>> Importing commands from ${full}`);
