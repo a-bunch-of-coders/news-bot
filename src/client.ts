@@ -29,6 +29,7 @@ export async function buildClient(db: Database): Promise<Client> {
 		console.log(">> Bot started");
 
 		// to create/update/delete discord application commands
+		
 		client.initApplicationCommands().catch((error: unknown) => {
 			console.error(">> Failed to initialize application commands:", error);
 		}).finally(() => {
