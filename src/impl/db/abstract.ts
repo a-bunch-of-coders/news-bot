@@ -83,6 +83,13 @@ export abstract class Database {
     abstract feeds(): Promise<Feed[]>;
 
     /**
+     * Retried total number of feeds in the database.
+     * 
+     * @returns The total feed count.
+     */
+    abstract feedCount(): Promise<number>;
+
+    /**
      * Retrieve the feed given the url and guild ID.
      * 
      * @param guildId - The Discord guild ID.
