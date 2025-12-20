@@ -3,6 +3,7 @@ import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
 
 import type { Database } from "./impl/db/abstract.js";
+import { Config } from "./config.js";
 
 
 // basic.
@@ -11,7 +12,7 @@ function isTypeScriptRuntime(): boolean {
 	return entry.endsWith(".ts");
 }
 
-export async function buildClient(db: Database): Promise<Client> {
+export async function buildClient(db: Database, config: Config): Promise<Client> {
 
 
 
@@ -58,6 +59,7 @@ export async function buildClient(db: Database): Promise<Client> {
 
 	// so everywhere in the code we can use client.db
 	client.db = db;
+	client.config = config;
 
 	return client;
 }

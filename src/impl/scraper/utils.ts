@@ -103,7 +103,15 @@ export function extractImage(entry: Parser.Item): string | null {
   const html = entry.content?.toString();
   if (!html) return null;
   const match = /<img[^>]+src=["']([^"']+)["'][^>]*>/i.exec(html);
-  if (!match?.[1]) return null;
+  if (!match?.[1]) {
+    // check entry["content:encoded"]
+    const encoded = (entry as any)["content:encoded"]?.toString();
+    if (encoded) {
+      const matchEncoded = /<img[^>]+src=["']([^"']+)["'][^>]*>/i.exec(encoded);
+      if (matchEncoded?.[1]) return matchEncoded[1];
+    }
+    return null;
+  }
 
   if (match && validateImageUrl(match[1])) {
     return match[1];

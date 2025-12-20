@@ -1,3 +1,4 @@
+import { Config } from "./config.js";
 import type { Database } from "./impl/db/abstract.js";
 
 
@@ -5,6 +6,7 @@ import type { Database } from "./impl/db/abstract.js";
 declare module "discordx" {
     export interface Client {
         db: Database;
+        config: Config;
     }
 }
 

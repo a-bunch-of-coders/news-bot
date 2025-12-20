@@ -187,9 +187,9 @@ export async function parseFeed(content: string) {
   const text = looksEscaped ? raw.replace(/\\n/g, "\n").replace(/\\t/g, "\t") : raw;
   const parser = new Parser({
     // Helps rss-parser pick common fields
-    // customFields: {
-    //   item: ["content:encoded", "media:content", "media:thumbnail", "enclosure"],
-    // },
+    customFields: {
+      item: ["content:encoded", "media:content", "media:thumbnail", "enclosure"],
+    },
   });
 
   return await parser.parseString(text);

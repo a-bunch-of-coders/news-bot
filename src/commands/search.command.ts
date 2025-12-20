@@ -5,10 +5,12 @@ import type {
   CommandInteraction,
   ModalSubmitInteraction,
   SelectMenuInteraction,
+  TextChannel,
 } from "discord.js";
 import {
   ActionRowBuilder,
   ApplicationCommandOptionType,
+  ChannelType,
   MessageFlags,
   ModalBuilder,
   TextInputBuilder,
@@ -39,6 +41,7 @@ import type { RssViewState, SearchViewState, ViewKind } from "./feedspot/types.j
 import { buildRssPage } from "./feedspot/view/rssView.js";
 import { buildSearchPage } from "./feedspot/view/searchView.js";
 import { clamp, makeViewId } from "./feedspot/view/viewId.js";
+import { addFeedCore } from "../impl/internal_commands/add.js";
 
 /**
  * Command entry + DiscordX interaction handlers.
@@ -275,6 +278,48 @@ export class FeedspotCommand {
 
     const { embed, components } = buildRssPage(viewId, rssState);
     await interaction.editReply({ content: "", embeds: [embed], components });
+  }
+
+
+  @ButtonComponent({ id: /^feedspot_add_[a-z0-9_-]+$/i })
+  async onAddFeedButton(interaction: ButtonInteraction): Promise<void> {
+    if (!interaction.guild) {
+      await interaction.reply({ content: "This can only be used in a server.", flags: MessageFlags.Ephemeral });
+      return;
+    }
+
+    // customId: feedspot_add_<viewId>_<page>
+    const parts = interaction.customId.split("_");
+    const viewId = parts[2];
+    const page = Number(parts[3]);
+
+    // You need your existing state retrieval here:
+    const state = cacheGet(viewId);
+    if (!state) {
+      await interaction.reply({
+        content: "That view expired. Please run the command again.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    const feed = state.feeds[page];
+    if (!feed?.rss) {
+      await interaction.reply({ content: "Could not resolve that feed.", flags: MessageFlags.Ephemeral });
+      return;
+    }
+
+    // Target channel = the channel where the user clicked the button
+    const ch = interaction.channel;
+    if (!ch || ch.type !== ChannelType.GuildText) {
+      await interaction.reply({
+        content: "This button must be used in a server text channel.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    await addFeedCore(interaction, feed.rss, ch);
   }
 
   /* -------------------------

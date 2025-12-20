@@ -53,7 +53,7 @@ export async function check(client: Client): Promise<void> {
 
         for (const result of results) {
             if (!result.ok && !result.error.message.includes("Timeout")) {
-                console.error(`Failed to check ${result.url}: ${result.error}`);
+                console.error(`Failed to check ${result.url}`, result.error);
             }
         }
     } finally {
@@ -206,36 +206,81 @@ async function processFeed(feed: DbFeed, database: Database, client: Client): Pr
 
 
 function identifier(entry: Parser.Item): string {
-    const parts: string[] = [];
-    const t = parserTitle(entry).trim().toLowerCase().replace(/[\n\r\t:!\?\.,;\-–—]/g, " ");
-    if (t) {
-        const words = t.split(/\s+/).filter(w => w.length > 2);
-        if (words.length) parts.push(words.join(" "));
+  const parts: string[] = [];
+
+  const toText = (v: unknown): string | undefined => {
+    if (v == null) return undefined;
+
+    if (typeof v === "string") {
+      const s = v.trim();
+      return s.length ? s : undefined;
     }
 
-    const link = entry.link
-    if (link) {
-        try {
-            const u = new URL(link);
-            const segs = u.pathname.split("/").filter(Boolean);
-            if (segs.length) parts.push(segs.join("/"));
-        } catch {
-            parts.push(link);
-        }
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        const s = toText(item);
+        if (s) return s;
+      }
+      return undefined;
     }
 
-    if (entry.guid) parts.push(entry.guid);
-    const pd = (entry.isoDate)?.slice(0, 10);
-    if (pd) parts.push(pd);
-
-    if (!parts.length) {
-        return `entry_${Date.now()}`;
+    if (typeof v === "object") {
+      const o = v as Record<string, unknown>;
+      // common RSS shapes
+      for (const k of ["#", "_", "$t", "value", "href", "url", "link"]) {
+        const s = toText(o[k]);
+        if (s) return s;
+      }
     }
 
-    const hash = Buffer.from(parts.join("|")).toString("base64");
-    // console.debug(`Article identifier: ${parts.join(" | ")} -> ${hash}`);
-    return hash;
+    return undefined;
+  };
+
+  /* ---------- 1. Link (primary, most stable) ---------- */
+
+  const link = toText((entry as any).link);
+  if (link) {
+    try {
+      const u = new URL(link);
+      const host = u.host.toLowerCase();
+      const path = u.pathname.replace(/\/+$/g, "");
+      parts.push(`${host}${path}`);
+    } catch {
+      parts.push(link.toLowerCase());
+    }
+  }
+
+  /* ---------- 2. Title (fallback) ---------- */
+
+  if (!parts.length) {
+    const rawTitle = toText(parserTitle(entry));
+    if (rawTitle) {
+      const normalized = rawTitle
+        .toLowerCase()
+        .replace(/[\n\r\t:!\?\.,;–—-]/g, " ")
+        .split(/\s+/)
+        .filter(w => w.length > 2)
+        .join(" ");
+
+      if (normalized) parts.push(normalized);
+    }
+  }
+
+  /* ---------- 3. Date (tie-breaker only) ---------- */
+
+  const iso = toText((entry as any).isoDate);
+  const day = iso?.slice(0, 10);
+  if (day) parts.push(day);
+
+  if (!parts.length) return `entry_${Date.now()}`;
+
+  return Buffer.from(parts.join("|"))
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
 }
+
 
 async function post(feed: DbFeed, entry: Parser.Item, client: Client): Promise<void> {
     const webhook = feed.webhook_url

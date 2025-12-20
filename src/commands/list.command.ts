@@ -2,9 +2,12 @@ import type {
   ButtonInteraction,
   CommandInteraction,
   ModalSubmitInteraction,
-  SelectMenuInteraction} from "discord.js";
+  SelectMenuInteraction,
+  TextChannel
+} from "discord.js";
 import {
   ActionRowBuilder,
+  ApplicationCommandOptionType,
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
@@ -21,6 +24,7 @@ import {
   ModalComponent,
   SelectMenuComponent,
   Slash,
+  SlashOption,
 } from "discordx";
 
 import type { Feed as FeedModel } from "../impl/db/abstract.js";
@@ -29,13 +33,23 @@ const FEEDS_PER_PAGE = 10;
 
 @Discord()
 export class ListCommand {
-  constructor() {}
+  constructor() { }
 
   @Slash({
     name: "list",
     description: "List configured RSS feeds for this server",
   })
-  async list(interaction: CommandInteraction): Promise<void> {
+
+  async list(
+
+    @SlashOption({
+      name: "channel",
+      description: "The channel for pagination",
+      required: false,
+      type: ApplicationCommandOptionType.Channel,
+    })
+    channel: TextChannel | null,
+  interaction: CommandInteraction): Promise<void> {
     const guildId = interaction.guildId;
     if (!guildId) {
       await interaction.reply({
@@ -45,10 +59,24 @@ export class ListCommand {
       return;
     }
 
-    const feeds = await interaction.client.db.guild(guildId);
+    if (channel && channel.guildId !== guildId) {
+      await interaction.reply({
+        content: "The specified channel is not in this server.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    let feeds: FeedModel[] = [];
+    if (channel) {
+      feeds = await interaction.client.db.channel(guildId, channel.id);
+    } else {
+      feeds = await interaction.client.db.guild(guildId);
+    }
+
     if (feeds.length === 0) {
       await interaction.reply({
-        content: "No RSS feeds configured for this server.",
+        content: `No RSS feeds configured for ${channel ? `<#${channel.id}>` : "this server"}.`,
         flags: MessageFlags.Ephemeral,
       });
       return;
@@ -79,11 +107,11 @@ export class ListCommand {
     const totalPages = Math.ceil(feeds.length / FEEDS_PER_PAGE);
     const [_, action, pageStr] = interaction.customId.split("_");
     if (pageStr === undefined) {
-        await interaction.reply({
-            content: "Invalid pagination action.",
-            flags: MessageFlags.Ephemeral,
-            });
-        return;
+      await interaction.reply({
+        content: "Invalid pagination action.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
     }
     const currentPage = parseInt(pageStr, 10);
 
@@ -191,10 +219,10 @@ export class ListCommand {
         const domain = this.extractDomain(feed.url);
         const last = feed.last_item_date
           ? new Date(feed.last_item_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })
           : "Never";
         return `**${idx}.** \`${domain}\` → <#${feed.channel_id}> | Last updated: ${last}`;
       })

@@ -15,14 +15,9 @@ import {
   Slash,
   SlashOption,
 } from "discordx";
-import { URL } from "url";
 
-import { parseFeed } from "../impl/scraper/parser.js";
-import { fetchSingle as fetchFeed } from "../impl/scraper/utils.js";
+import { addFeedCore } from "../impl/internal_commands/add.js";
 
-const FETCH_TIMEOUT_MS = 15_000;
-const MAX_FEED_SIZE = 5_000_000;  // 5 MB
-const MAX_ENTRY_COUNT = 500;
 
 @Discord()
 export class FeedCommand {
@@ -52,18 +47,9 @@ export class FeedCommand {
 
     interaction: CommandInteraction
   ): Promise<void> {
-    // 1) URL syntax check
-    let parsedUrl: URL;
-    try {
-      parsedUrl = new URL(url);
-    } catch {
-      await interaction.reply({ content: "Invalid URL.", flags: MessageFlags.Ephemeral, });
-      return;
-    }
 
-    // 2) Determine target channel
-    const target = channelOption
-      ?? (interaction.channel as TextChannel | null);
+        // Keep your existing “resolve target” behavior
+    const target = channelOption ?? (interaction.channel as TextChannel | null);
     if (!target) {
       await interaction.reply({
         content: "Could not resolve target text channel.",
@@ -72,95 +58,7 @@ export class FeedCommand {
       return;
     }
 
-    // check webhook permissions
-    if (!target.permissionsFor(interaction.client.user)?.has(PermissionFlagsBits.ManageWebhooks)) {
-      await interaction.reply({
-        content: "I need the 'Manage Webhooks' permission in the target channel to post feed updates.",
-        flags: MessageFlags.Ephemeral,
-      });
-      return;
-    }
 
-    // 4) Defer reply (gives us more time)
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral, });
-
-
-    const guildId = interaction.guild?.id;
-    const channelId = target.id;;
-    if (!guildId) return;
-
-    // 3) Check duplicate
-    if (await interaction.client.db.duplicate(guildId, url)) {
-      const feed = await interaction.client.db.feed(guildId, url);
-      await interaction.editReply({
-        content: `This feed is already added to <#${feed!.channel_id}>.`,
-      });
-      return;
-    }
-
-
-    // 5) Fetch + size‐limit + timeout
-    let content: string;
-    try {
-      content = await fetchFeed(url);
-    } catch (err: any) {
-      await interaction.editReply({
-        content: `Failed to fetch/validate feed: ${err.message}`,
-      });
-      return;
-    }
-
-    if (content.length > MAX_FEED_SIZE) {
-      await interaction.editReply({
-        content: `Feed is too large (${content.length} bytes).`,
-      });
-      return;
-    }
-
-    // 6) Parse & entry count check
-    let feed;
-    try {
-      feed = await parseFeed(content);
-    } catch (err: any) {
-      await interaction.editReply({
-        content: `Failed to parse feed: ${err.message}`,
-      });
-      return;
-    }
-
-
-    if (feed.items.length > MAX_ENTRY_COUNT) {
-      await interaction.editReply({
-        content: `Feed has ${feed.items.length} items—max is ${MAX_ENTRY_COUNT}.`,
-      });
-      return;
-    }
-
-    // check if there is a webhook created by us.
-    const webhooks = await target.fetchWebhooks()
-    const botWebhooks = webhooks.filter(wh => wh.owner?.id === interaction.client.user.id);
-
-    let webhook = botWebhooks.first();
-    // create a webhook
-    webhook ??= await target.createWebhook({
-      name: 'RSS Feed Bot',
-      reason: 'Webhook for posting RSS feed updates',
-    });
-
-    // 7) Insert into DB
-    await interaction.client.db.add(
-      guildId,
-      channelId,
-      url,
-      feed.title ?? undefined,
-      webhook.url,
-    );
-
-    // 8) Success message
-    const domain = parsedUrl.host;
-    const kb = (content.length / 1024).toFixed(1);
-    await interaction.editReply({
-      content: `✅ Added \`${domain}\` → <#${channelId}> | ${feed.items.length} items • ${kb} KB`,
-    });
+    await addFeedCore(interaction, url, target);
   }
 }

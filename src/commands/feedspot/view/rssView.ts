@@ -79,5 +79,15 @@ export function buildRssPage(
     );
   }
 
+  // NEW: add-feed row (separate row keeps layout clean)
+components.push(
+  new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`feedspot_add_${viewId}_${page}`)
+      .setLabel("Add this feed")
+      .setEmoji("➕")
+      .setStyle(ButtonStyle.Success)
+  ));
+
   return { embed, components };
 }

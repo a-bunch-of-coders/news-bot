@@ -6,7 +6,7 @@ export const FEEDSPOT_BASE = "https://bloggers.feedspot.com";
 export const FETCH_TIMEOUT_MS = 15_000;
 
 export const SEARCH_RESULTS_PER_PAGE = 10;
-export const RSS_PER_PAGE = 10;
+export const RSS_PER_PAGE = 1;
 export const SEARCH_MAX_RESULTS = 50;
 
 export const VIEW_TTL_MS = 10 * 60_000; // 10 minutes

@@ -1,11 +1,11 @@
 // src/commands/feedspot/feedspotApi.ts
 import {
+  FEEDSPOT_COOKIE,
   FEEDSPOT_CT_URL,
   FEEDSPOT_ORIGIN,
+  FEEDSPOT_UA,
   FETCH_TIMEOUT_MS,
   SEARCH_MAX_RESULTS,
-  FEEDSPOT_COOKIE,
-  FEEDSPOT_UA,
 } from "./constants.js";
 import { fetchJsonWithTimeout } from "./http.js";
 import type { FeedspotSearchItem, FeedspotSearchResponse } from "./types.js";

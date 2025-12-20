@@ -115,6 +115,16 @@ export class KnexDatabase extends Database {
         return raw.map(this.formatFeed);
     }
 
+    async feedCount(): Promise<number> {
+        const row = await this.db("feeds")
+            .count<{ count: string }>("id as count")
+            .first();
+
+        // row is either `{ count: string }` or undefined
+        const cnt = row ? parseInt(row.count, 10) : 0;
+        return cnt;
+    }
+
     async feed(guildId: string, url: string): Promise<Feed | null> {
         const row = await this.db<Feed>("feeds")
             .select(

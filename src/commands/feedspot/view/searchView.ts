@@ -1,5 +1,6 @@
 // src/commands/feedspot/view/searchView.ts
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
+
 import { SEARCH_RESULTS_PER_PAGE } from "../constants.js";
 import type { SearchViewState } from "../types.js";
 import { clamp, shortHost } from "./viewId.js";
